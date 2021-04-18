@@ -74,14 +74,14 @@ func deletePersonById(c *gin.Context) {
 //crud - create, read, update, delete
 
 
-func main() {
-	r := gin.Default()
-	// r.POST("/", PostHomePage)
+// func main() {
+// 	r := gin.Default()
+// 	// r.POST("/", PostHomePage)
 
-	r.POST("/:name/:birthday", createPerson)
-	r.GET("/:id", getPersonById)
-	r.PUT("/:id/:birthday", updatePersonBirthday)
-	r.DELETE("/:id", deletePersonById)
+// 	r.POST("/:name/:birthday", createPerson)
+// 	r.GET("/:id", getPersonById)
+// 	r.PUT("/:id/:birthday", updatePersonBirthday)
+// 	r.DELETE("/:id", deletePersonById)
 
-	r.Run()
-}
+// 	r.Run()
+// }
