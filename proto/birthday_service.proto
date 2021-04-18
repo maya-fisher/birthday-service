@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package birthday;
+
+service Birthdays {
+  rpc CreateBirthdayPersonBy (getBirthdayRequest) returns (GetBirthdayResponse) {}
+  rpc GetBirthdayPersonByID (GetByIDRequest) returns (GetBirthdayResponse) {}
+  rpc UpdateBirthdayByIdAndName (getBirthdayRequest) returns (GetBirthdayResponse) {}
+  rpc DeleteBirthdayByID (GetByIDRequest) returns (GetBirthdayResponse) {}
+}
+
+message getBirthdayRequest {
+    Person person = 1;
+}
+
+message GetBirthdayResponse {
+    Person person = 1;
+}
+
+message GetByIDRequest {
+    string id = 1;
+}
+
+message Person {
+    string name = 1;
+    int64 birthday = 2;
+}
+
+
