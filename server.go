@@ -4,11 +4,11 @@ import (
 	"log"
 
 	"google.golang.org/grpc"
-	pb ""
+	""
 )
 
 const (
-	address = "localhost:50052"
+	address = "localhost:50053"
 )
 
 func main() {
