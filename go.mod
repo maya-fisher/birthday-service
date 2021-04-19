@@ -1,4 +1,4 @@
-module example.com/m
+module github.com/maya-fisher/birthday-service
 
 go 1.16
 
