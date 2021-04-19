@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "context"
+	"context"
 	"log"
 	"net"
 
@@ -23,12 +23,11 @@ type Person struct {
 	Birthday int64
 }
 
-// fpadjfpoasf
 
 func (s *server) CreateBirthdayPersonBy(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetIdResponse, error) {
 
 	log.Printf("Received: %v", in.GetPerson()) 
-	return &pb.GetIdResponse{Id: in.GetId(), }
+	return &pb.GetIdResponse{in.GetId()}, nil
 }
 
 func main() {
