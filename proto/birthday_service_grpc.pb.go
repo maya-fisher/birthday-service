@@ -18,10 +18,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BirthdaysClient interface {
-	CreateBirthdayPersonBy(ctx context.Context, in *GetBirthdayRequest, opts ...grpc.CallOption) (*GetBirthdayResponse, error)
+	CreateBirthdayPersonBy(ctx context.Context, in *GetBirthdayRequest, opts ...grpc.CallOption) (*GetIdResponse, error)
 	GetBirthdayPersonByID(ctx context.Context, in *GetByIDRequest, opts ...grpc.CallOption) (*GetBirthdayResponse, error)
-	UpdateBirthdayByIdAndName(ctx context.Context, in *GetBirthdayRequest, opts ...grpc.CallOption) (*GetBirthdayResponse, error)
-	DeleteBirthdayByID(ctx context.Context, in *GetByIDRequest, opts ...grpc.CallOption) (*GetBirthdayResponse, error)
+	UpdateBirthdayByIdAndName(ctx context.Context, in *GetBirthdayRequest, opts ...grpc.CallOption) (*GetIdResponse, error)
+	DeleteBirthdayByID(ctx context.Context, in *GetByIDRequest, opts ...grpc.CallOption) (*GetIdResponse, error)
 }
 
 type birthdaysClient struct {
@@ -32,8 +32,8 @@ func NewBirthdaysClient(cc grpc.ClientConnInterface) BirthdaysClient {
 	return &birthdaysClient{cc}
 }
 
-func (c *birthdaysClient) CreateBirthdayPersonBy(ctx context.Context, in *GetBirthdayRequest, opts ...grpc.CallOption) (*GetBirthdayResponse, error) {
-	out := new(GetBirthdayResponse)
+func (c *birthdaysClient) CreateBirthdayPersonBy(ctx context.Context, in *GetBirthdayRequest, opts ...grpc.CallOption) (*GetIdResponse, error) {
+	out := new(GetIdResponse)
 	err := c.cc.Invoke(ctx, "/birthday.Birthdays/CreateBirthdayPersonBy", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -50,8 +50,8 @@ func (c *birthdaysClient) GetBirthdayPersonByID(ctx context.Context, in *GetByID
 	return out, nil
 }
 
-func (c *birthdaysClient) UpdateBirthdayByIdAndName(ctx context.Context, in *GetBirthdayRequest, opts ...grpc.CallOption) (*GetBirthdayResponse, error) {
-	out := new(GetBirthdayResponse)
+func (c *birthdaysClient) UpdateBirthdayByIdAndName(ctx context.Context, in *GetBirthdayRequest, opts ...grpc.CallOption) (*GetIdResponse, error) {
+	out := new(GetIdResponse)
 	err := c.cc.Invoke(ctx, "/birthday.Birthdays/UpdateBirthdayByIdAndName", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -59,8 +59,8 @@ func (c *birthdaysClient) UpdateBirthdayByIdAndName(ctx context.Context, in *Get
 	return out, nil
 }
 
-func (c *birthdaysClient) DeleteBirthdayByID(ctx context.Context, in *GetByIDRequest, opts ...grpc.CallOption) (*GetBirthdayResponse, error) {
-	out := new(GetBirthdayResponse)
+func (c *birthdaysClient) DeleteBirthdayByID(ctx context.Context, in *GetByIDRequest, opts ...grpc.CallOption) (*GetIdResponse, error) {
+	out := new(GetIdResponse)
 	err := c.cc.Invoke(ctx, "/birthday.Birthdays/DeleteBirthdayByID", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -72,10 +72,10 @@ func (c *birthdaysClient) DeleteBirthdayByID(ctx context.Context, in *GetByIDReq
 // All implementations must embed UnimplementedBirthdaysServer
 // for forward compatibility
 type BirthdaysServer interface {
-	CreateBirthdayPersonBy(context.Context, *GetBirthdayRequest) (*GetBirthdayResponse, error)
+	CreateBirthdayPersonBy(context.Context, *GetBirthdayRequest) (*GetIdResponse, error)
 	GetBirthdayPersonByID(context.Context, *GetByIDRequest) (*GetBirthdayResponse, error)
-	UpdateBirthdayByIdAndName(context.Context, *GetBirthdayRequest) (*GetBirthdayResponse, error)
-	DeleteBirthdayByID(context.Context, *GetByIDRequest) (*GetBirthdayResponse, error)
+	UpdateBirthdayByIdAndName(context.Context, *GetBirthdayRequest) (*GetIdResponse, error)
+	DeleteBirthdayByID(context.Context, *GetByIDRequest) (*GetIdResponse, error)
 	mustEmbedUnimplementedBirthdaysServer()
 }
 
@@ -83,16 +83,16 @@ type BirthdaysServer interface {
 type UnimplementedBirthdaysServer struct {
 }
 
-func (UnimplementedBirthdaysServer) CreateBirthdayPersonBy(context.Context, *GetBirthdayRequest) (*GetBirthdayResponse, error) {
+func (UnimplementedBirthdaysServer) CreateBirthdayPersonBy(context.Context, *GetBirthdayRequest) (*GetIdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateBirthdayPersonBy not implemented")
 }
 func (UnimplementedBirthdaysServer) GetBirthdayPersonByID(context.Context, *GetByIDRequest) (*GetBirthdayResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBirthdayPersonByID not implemented")
 }
-func (UnimplementedBirthdaysServer) UpdateBirthdayByIdAndName(context.Context, *GetBirthdayRequest) (*GetBirthdayResponse, error) {
+func (UnimplementedBirthdaysServer) UpdateBirthdayByIdAndName(context.Context, *GetBirthdayRequest) (*GetIdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateBirthdayByIdAndName not implemented")
 }
-func (UnimplementedBirthdaysServer) DeleteBirthdayByID(context.Context, *GetByIDRequest) (*GetBirthdayResponse, error) {
+func (UnimplementedBirthdaysServer) DeleteBirthdayByID(context.Context, *GetByIDRequest) (*GetIdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteBirthdayByID not implemented")
 }
 func (UnimplementedBirthdaysServer) mustEmbedUnimplementedBirthdaysServer() {}

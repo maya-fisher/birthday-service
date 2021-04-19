@@ -3,10 +3,10 @@ syntax = "proto3";
 package birthday;
 
 service Birthdays {
-  rpc CreateBirthdayPersonBy (getBirthdayRequest) returns (GetBirthdayResponse) {}
+  rpc CreateBirthdayPersonBy (getBirthdayRequest) returns (GetIdResponse) {}
   rpc GetBirthdayPersonByID (GetByIDRequest) returns (GetBirthdayResponse) {}
-  rpc UpdateBirthdayByIdAndName (getBirthdayRequest) returns (GetBirthdayResponse) {}
-  rpc DeleteBirthdayByID (GetByIDRequest) returns (GetBirthdayResponse) {}
+  rpc UpdateBirthdayByIdAndName (getBirthdayRequest) returns (GetIdResponse) {}
+  rpc DeleteBirthdayByID (GetByIDRequest) returns (GetIdResponse) {}
 }
 
 message getBirthdayRequest {
@@ -18,6 +18,10 @@ message GetBirthdayResponse {
 }
 
 message GetByIDRequest {
+    string id = 1;
+}
+
+message GetIdResponse {
     string id = 1;
 }
 
