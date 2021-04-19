@@ -23,6 +23,8 @@ type Person struct {
 	Birthday int64
 }
 
+// fpadjfpoasf
+
 func (s *server) CreateBirthdayPersonBy(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetIdResponse, error) {
 
 	log.Printf("Received: %v", in.GetPerson()) 
