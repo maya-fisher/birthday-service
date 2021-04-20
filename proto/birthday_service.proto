@@ -30,4 +30,3 @@ message Person {
     int64 birthday = 2;
 }
 
-
