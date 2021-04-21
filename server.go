@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"fmt"
+	// "strconv"
 
 	pb "github.com/maya-fisher/birthday-service/proto"
 	"google.golang.org/grpc"
@@ -28,14 +29,18 @@ type server struct {
 type Person struct {
 	Name string
 	Birthday int64
+	UserId string
 }
 
 var Birthday_collection *mongo.Collection
 
 func (s *server) CreateBirthdayPersonBy(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetIdResponse, error) {
+
+
+	tm := time.Unix(in.GetPerson().Birthday, 0)
 	result, err := Birthday_collection.InsertOne(ctx, bson.D{
 		{Key:"name",Value: in.GetPerson().Name,},
-		{Key:"birthday",Value: in.GetPerson().Birthday},
+		{Key:"birthday",Value: tm},
 	})
 	
 	if err != nil {
