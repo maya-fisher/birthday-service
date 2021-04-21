@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 	"fmt"
-	// "strconv"
+	
 
 	pb "github.com/maya-fisher/birthday-service/proto"
 	"google.golang.org/grpc"
@@ -38,19 +38,15 @@ func (s *server) CreateBirthdayPersonBy(ctx context.Context, in *pb.GetBirthdayR
 
 
 	tm := time.Unix(in.GetPerson().Birthday, 0)
-	result, err := Birthday_collection.InsertOne(ctx, bson.D{
-		{Key:"name",Value: in.GetPerson().Name,},
-		{Key:"birthday",Value: tm},
+	Birthday_collection.InsertOne(ctx, bson.D{
+		{Key:"Name",Value: in.GetPerson().Name,},
+		{Key:"Birthday",Value: tm},
+		{Key: "UserID", Value: in.GetPerson().UserId},
 	})
-	
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	InsertedID := result.InsertedID
-	fmt.Println(InsertedID)
+	fmt.Println(in.GetPerson().UserId)
 	log.Printf("Received: %v", in.GetPerson()) 
-	return &pb.GetIdResponse{Id: "InsertedID"}, nil
+	return &pb.GetIdResponse{Id: in.GetPerson().UserId}, nil
 }
 
 func (s *server) UpdateBirthdayByIdAndName(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetIdResponse, error){
@@ -59,11 +55,29 @@ func (s *server) UpdateBirthdayByIdAndName(ctx context.Context, in *pb.GetBirthd
 }
 
 func (s *server) GetBirthdayPersonByID(ctx context.Context, in *pb.GetByIDRequest) (*pb.GetBirthdayResponse, error) {
+
+	query := &bson.M{
+		"UserID": "212395024",
+	  }
+
+	result := bson.D{}
+	e := Birthday_collection.FindOne(context.TODO(), query).Decode(&result)
+	fmt.Println(e)
+
+
+
 	log.Printf("Received: %v", in.GetId()) 
 	return &pb.GetBirthdayResponse{}, nil
 }
 
 func (s *server) DeleteBirthdayByID(ctx context.Context, in *pb.GetByIDRequest) (*pb.GetIdResponse, error) {
+
+	result, err := Birthday_collection.DeleteOne(ctx, bson.M{"UserID": "212395025"})
+	if err != nil {
+    	log.Fatal(err)
+	}
+	fmt.Printf("DeleteOne removed %v document(s)\n", result.DeletedCount)
+
 	log.Printf("Received: %v", in.GetId()) 
 	return &pb.GetIdResponse{}, nil
 }
