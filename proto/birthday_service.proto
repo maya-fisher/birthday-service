@@ -5,7 +5,7 @@ package birthday;
 service Birthdays {
   rpc CreateBirthdayPersonBy (getBirthdayRequest) returns (GetIdResponse) {}
   rpc GetBirthdayPersonByID (GetByIDRequest) returns (GetBirthdayResponse) {}
-  rpc UpdateBirthdayByIdAndName (getBirthdayRequest) returns (GetIdResponse) {}
+  rpc UpdateBirthdayByIdAndName (getBirthdayRequest) returns (GetBirthdayResponse) {}
   rpc DeleteBirthdayByID (GetByIDRequest) returns (GetIdResponse) {}
 }
 
@@ -18,11 +18,11 @@ message GetBirthdayResponse {
 }
 
 message GetByIDRequest {
-    string id = 1;
+    string userId = 1;
 }
 
 message GetIdResponse {
-    string id = 1;
+    string userId = 1;
 }
 
 message Person {

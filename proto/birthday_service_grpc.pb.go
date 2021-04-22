@@ -20,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type BirthdaysClient interface {
 	CreateBirthdayPersonBy(ctx context.Context, in *GetBirthdayRequest, opts ...grpc.CallOption) (*GetIdResponse, error)
 	GetBirthdayPersonByID(ctx context.Context, in *GetByIDRequest, opts ...grpc.CallOption) (*GetBirthdayResponse, error)
-	UpdateBirthdayByIdAndName(ctx context.Context, in *GetBirthdayRequest, opts ...grpc.CallOption) (*GetIdResponse, error)
+	UpdateBirthdayByIdAndName(ctx context.Context, in *GetBirthdayRequest, opts ...grpc.CallOption) (*GetBirthdayResponse, error)
 	DeleteBirthdayByID(ctx context.Context, in *GetByIDRequest, opts ...grpc.CallOption) (*GetIdResponse, error)
 }
 
@@ -50,8 +50,8 @@ func (c *birthdaysClient) GetBirthdayPersonByID(ctx context.Context, in *GetByID
 	return out, nil
 }
 
-func (c *birthdaysClient) UpdateBirthdayByIdAndName(ctx context.Context, in *GetBirthdayRequest, opts ...grpc.CallOption) (*GetIdResponse, error) {
-	out := new(GetIdResponse)
+func (c *birthdaysClient) UpdateBirthdayByIdAndName(ctx context.Context, in *GetBirthdayRequest, opts ...grpc.CallOption) (*GetBirthdayResponse, error) {
+	out := new(GetBirthdayResponse)
 	err := c.cc.Invoke(ctx, "/birthday.Birthdays/UpdateBirthdayByIdAndName", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (c *birthdaysClient) DeleteBirthdayByID(ctx context.Context, in *GetByIDReq
 type BirthdaysServer interface {
 	CreateBirthdayPersonBy(context.Context, *GetBirthdayRequest) (*GetIdResponse, error)
 	GetBirthdayPersonByID(context.Context, *GetByIDRequest) (*GetBirthdayResponse, error)
-	UpdateBirthdayByIdAndName(context.Context, *GetBirthdayRequest) (*GetIdResponse, error)
+	UpdateBirthdayByIdAndName(context.Context, *GetBirthdayRequest) (*GetBirthdayResponse, error)
 	DeleteBirthdayByID(context.Context, *GetByIDRequest) (*GetIdResponse, error)
 	mustEmbedUnimplementedBirthdaysServer()
 }
@@ -89,7 +89,7 @@ func (UnimplementedBirthdaysServer) CreateBirthdayPersonBy(context.Context, *Get
 func (UnimplementedBirthdaysServer) GetBirthdayPersonByID(context.Context, *GetByIDRequest) (*GetBirthdayResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBirthdayPersonByID not implemented")
 }
-func (UnimplementedBirthdaysServer) UpdateBirthdayByIdAndName(context.Context, *GetBirthdayRequest) (*GetIdResponse, error) {
+func (UnimplementedBirthdaysServer) UpdateBirthdayByIdAndName(context.Context, *GetBirthdayRequest) (*GetBirthdayResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateBirthdayByIdAndName not implemented")
 }
 func (UnimplementedBirthdaysServer) DeleteBirthdayByID(context.Context, *GetByIDRequest) (*GetIdResponse, error) {
