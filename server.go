@@ -38,11 +38,11 @@ func (s *server) CreateBirthdayPersonBy(ctx context.Context, in *pb.GetBirthdayR
 
 	log.Printf("Received: %v", in.GetPerson()) 
 
-	return &pb.GetIdResponse{Id: in.GetPerson().UserId}, nil
+	return &pb.GetIdResponse{UserId: in.GetPerson().UserId}, nil
 }  
 
 
-func (s *server) UpdateBirthdayByIdAndName(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetIdResponse, error){
+func (s *server) UpdateBirthdayByIdAndName(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetBirthdayResponse, error){
 
 	time := time.Unix(in.GetPerson().Birthday, 0)
 	update := bson.M{"$set": bson.M{"Birthday": time}}
@@ -87,13 +87,13 @@ func (s *server) UpdateBirthdayByIdAndName(ctx context.Context, in *pb.GetBirthd
 
 	fmt.Println(person)
 
-	return &pb.GetIdResponse{Id: in.GetPerson().UserId}, nil
+	return &pb.GetBirthdayResponse{Person: person}, nil
 } 
 
 
 func (s *server) GetBirthdayPersonByID(ctx context.Context, in *pb.GetByIDRequest) (*pb.GetBirthdayResponse, error) {
 
-	filter, err := Birthday_collection.Find(ctx, bson.M{"UserID": in.GetId()})
+	filter, err := Birthday_collection.Find(ctx, bson.M{"UserID": in.GetUserId()})
 
 	if err != nil {
 		log.Fatal(err)
@@ -116,7 +116,7 @@ func (s *server) GetBirthdayPersonByID(ctx context.Context, in *pb.GetByIDReques
 		UserId: userId,
 	}
 
-	log.Printf("Received: %v", in.GetId()) 
+	log.Printf("Received: %v", in.GetUserId()) 
 
 	return &pb.GetBirthdayResponse{Person: person}, nil
 } 
@@ -124,7 +124,7 @@ func (s *server) GetBirthdayPersonByID(ctx context.Context, in *pb.GetByIDReques
 
 func (s *server) DeleteBirthdayByID(ctx context.Context, in *pb.GetByIDRequest) (*pb.GetIdResponse, error) {
 
-	result, err := Birthday_collection.DeleteOne(ctx, bson.M{"UserID": in.GetId()})
+	result, err := Birthday_collection.DeleteOne(ctx, bson.M{"UserID": in.GetUserId()})
 
 	if err != nil {
     	log.Fatal(err)
@@ -132,9 +132,9 @@ func (s *server) DeleteBirthdayByID(ctx context.Context, in *pb.GetByIDRequest) 
 
 	fmt.Printf("DeleteOne removed %v document(s)\n", result.DeletedCount)
 
-	log.Printf("Received: %v", in.GetId()) 
+	log.Printf("Received: %v", in.GetUserId()) 
 
-	return &pb.GetIdResponse{Id: in.GetId()}, nil
+	return &pb.GetIdResponse{UserId: in.GetUserId()}, nil
 } 
 
 
