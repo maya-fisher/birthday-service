@@ -38,36 +38,10 @@ func (s *server) CreateBirthdayPersonBy(ctx context.Context, in *pb.GetBirthdayR
 
 	log.Printf("Received: %v", in.GetPerson()) 
 
-	filter, err := Birthday_collection.Find(ctx, bson.M{"UserID": in.GetPerson().UserId})
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var filtered_users []bson.D
-
-	if err = filter.All(ctx, &filtered_users); err != nil {
-		log.Fatal(err)
-	}
-
-	name := fmt.Sprintf("%v", filtered_users[0][1].Value)
-	userId := fmt.Sprintf("%v", filtered_users[0][3].Value)
-	unconverted_birthday := fmt.Sprintf("%v", filtered_users[0][2].Value)
-	birthday, err := strconv.ParseInt(unconverted_birthday, 10, 64)
-
-	person := &pb.Person{
-		Name: name,
-		Birthday: birthday,
-		UserId: userId,
-	}
-
-	fmt.Println(person)
+	person := getBrthdayByID(in.GetPerson().UserId, ctx)
 
 	return &pb.GetBirthdayResponse{Person: person}, nil
 }  
-
-
-
 
 
 func (s *server) UpdateBirthdayByIdAndName(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetBirthdayResponse, error){
@@ -88,32 +62,7 @@ func (s *server) UpdateBirthdayByIdAndName(ctx context.Context, in *pb.GetBirthd
         fmt.Println("UpdateOne() result:", result)
 	}
 
-	filterFind, err := Birthday_collection.Find(ctx, bson.M{"UserID": in.GetPerson().UserId})
-
-	if err != nil {
-		log.Fatal(err)
-	}	
-	
-	var filtered_users []bson.D
-
-
-	if err = filterFind.All(ctx, &filtered_users); err != nil {
-		log.Fatal(err)
-	}
-
-	name := fmt.Sprintf("%v", filtered_users[0][1].Value)
-	userId := fmt.Sprintf("%v", filtered_users[0][3].Value)
-	unconverted_birthday := fmt.Sprintf("%v", filtered_users[0][2].Value)
-	birthday, err := strconv.ParseInt(unconverted_birthday, 10, 64)
-
-	person := &pb.Person{
-		Name: name,
-		Birthday: birthday,
-		UserId: userId,
-	}
-
-
-	fmt.Println(person)
+	person := getBrthdayByID(in.GetPerson().UserId, ctx)
 
 	return &pb.GetBirthdayResponse{Person: person}, nil
 } 
@@ -121,28 +70,7 @@ func (s *server) UpdateBirthdayByIdAndName(ctx context.Context, in *pb.GetBirthd
 
 func (s *server) GetBirthdayPersonByID(ctx context.Context, in *pb.GetByIDRequest) (*pb.GetBirthdayResponse, error) {
 
-	filter, err := Birthday_collection.Find(ctx, bson.M{"UserID": in.GetUserId()})
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var filtered_users []bson.D
-
-	if err = filter.All(ctx, &filtered_users); err != nil {
-		log.Fatal(err)
-	}
-
-	name := fmt.Sprintf("%v", filtered_users[0][1].Value)
-	userId := fmt.Sprintf("%v", filtered_users[0][3].Value)
-	unconverted_birthday := fmt.Sprintf("%v", filtered_users[0][2].Value)
-	birthday, err := strconv.ParseInt(unconverted_birthday, 10, 64)
-
-	person := &pb.Person{
-		Name: name,
-		Birthday: birthday,
-		UserId: userId,
-	}
+	person := getBrthdayByID(in.GetUserId(), ctx)
 
 	log.Printf("Received: %v", in.GetUserId()) 
 
@@ -150,41 +78,9 @@ func (s *server) GetBirthdayPersonByID(ctx context.Context, in *pb.GetByIDReques
 } 
 
 
-
-
-
-
-
-
-
-
-
 func (s *server) DeleteBirthdayByID(ctx context.Context, in *pb.GetByIDRequest) (*pb.GetBirthdayResponse, error) {
 
-	filter, err := Birthday_collection.Find(ctx, bson.M{"UserID": in.GetUserId()})
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var filtered_users []bson.D
-
-	if err = filter.All(ctx, &filtered_users); err != nil {
-		log.Fatal(err)
-	}
-
-	name := fmt.Sprintf("%v", filtered_users[0][1].Value)
-	userId := fmt.Sprintf("%v", filtered_users[0][3].Value)
-	unconverted_birthday := fmt.Sprintf("%v", filtered_users[0][2].Value)
-	birthday, err := strconv.ParseInt(unconverted_birthday, 10, 64)
-
-	person := &pb.Person{
-		Name: name,
-		Birthday: birthday,
-		UserId: userId,
-	}
-
-	fmt.Println(person)
+	person := getBrthdayByID(in.GetUserId(), ctx)
 
 	result, err := Birthday_collection.DeleteOne(ctx, bson.M{"UserID": in.GetUserId()})
 
@@ -199,6 +95,35 @@ func (s *server) DeleteBirthdayByID(ctx context.Context, in *pb.GetByIDRequest) 
 	return &pb.GetBirthdayResponse{Person: person}, nil
 } 
 
+
+func getBrthdayByID(id string, ctx context.Context) (*pb.Person) {
+
+	filter, err := Birthday_collection.Find(ctx, bson.M{"UserID": id})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var filtered_users []bson.D
+
+	if err = filter.All(ctx, &filtered_users); err != nil {
+		log.Fatal(err)
+	}
+
+	name := fmt.Sprintf("%v", filtered_users[0][1].Value)
+	userId := fmt.Sprintf("%v", filtered_users[0][3].Value)
+	unconverted_birthday := fmt.Sprintf("%v", filtered_users[0][2].Value)
+	birthday, err := strconv.ParseInt(unconverted_birthday, 10, 64)
+
+	person := &pb.Person{
+		Name: name,
+		Birthday: birthday,
+		UserId: userId,
+	}
+
+	return person
+
+}
 
 func main() {
 
