@@ -26,7 +26,7 @@ type server struct {
 var Birthday_collection *mongo.Collection
 
 
-func (s *server) CreateBirthdayPersonBy(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetIdResponse, error) {
+func (s *server) CreateBirthdayPersonBy(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetBirthdayResponse, error) {
 
 	time := time.Unix(in.GetPerson().Birthday, 0)
 
@@ -38,8 +38,36 @@ func (s *server) CreateBirthdayPersonBy(ctx context.Context, in *pb.GetBirthdayR
 
 	log.Printf("Received: %v", in.GetPerson()) 
 
-	return &pb.GetIdResponse{UserId: in.GetPerson().UserId}, nil
+	filter, err := Birthday_collection.Find(ctx, bson.M{"UserID": in.GetPerson().UserId})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var filtered_users []bson.D
+
+	if err = filter.All(ctx, &filtered_users); err != nil {
+		log.Fatal(err)
+	}
+
+	name := fmt.Sprintf("%v", filtered_users[0][1].Value)
+	userId := fmt.Sprintf("%v", filtered_users[0][3].Value)
+	unconverted_birthday := fmt.Sprintf("%v", filtered_users[0][2].Value)
+	birthday, err := strconv.ParseInt(unconverted_birthday, 10, 64)
+
+	person := &pb.Person{
+		Name: name,
+		Birthday: birthday,
+		UserId: userId,
+	}
+
+	fmt.Println(person)
+
+	return &pb.GetBirthdayResponse{Person: person}, nil
 }  
+
+
+
 
 
 func (s *server) UpdateBirthdayByIdAndName(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetBirthdayResponse, error){
@@ -122,7 +150,41 @@ func (s *server) GetBirthdayPersonByID(ctx context.Context, in *pb.GetByIDReques
 } 
 
 
-func (s *server) DeleteBirthdayByID(ctx context.Context, in *pb.GetByIDRequest) (*pb.GetIdResponse, error) {
+
+
+
+
+
+
+
+
+
+func (s *server) DeleteBirthdayByID(ctx context.Context, in *pb.GetByIDRequest) (*pb.GetBirthdayResponse, error) {
+
+	filter, err := Birthday_collection.Find(ctx, bson.M{"UserID": in.GetUserId()})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var filtered_users []bson.D
+
+	if err = filter.All(ctx, &filtered_users); err != nil {
+		log.Fatal(err)
+	}
+
+	name := fmt.Sprintf("%v", filtered_users[0][1].Value)
+	userId := fmt.Sprintf("%v", filtered_users[0][3].Value)
+	unconverted_birthday := fmt.Sprintf("%v", filtered_users[0][2].Value)
+	birthday, err := strconv.ParseInt(unconverted_birthday, 10, 64)
+
+	person := &pb.Person{
+		Name: name,
+		Birthday: birthday,
+		UserId: userId,
+	}
+
+	fmt.Println(person)
 
 	result, err := Birthday_collection.DeleteOne(ctx, bson.M{"UserID": in.GetUserId()})
 
@@ -134,7 +196,7 @@ func (s *server) DeleteBirthdayByID(ctx context.Context, in *pb.GetByIDRequest) 
 
 	log.Printf("Received: %v", in.GetUserId()) 
 
-	return &pb.GetIdResponse{UserId: in.GetUserId()}, nil
+	return &pb.GetBirthdayResponse{Person: person}, nil
 } 
 
 
