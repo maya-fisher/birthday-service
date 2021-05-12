@@ -30,17 +30,24 @@ func (s *server) CreateBirthdayPersonBy(ctx context.Context, in *pb.GetBirthdayR
 
 	time := time.Unix(in.GetPerson().Birthday, 0)
 
-	Birthday_collection.InsertOne(ctx, bson.D{
+	result, err := Birthday_collection.InsertOne(ctx, bson.D{
 		{Key:"Name",Value: in.GetPerson().Name,},
 		{Key:"Birthday",Value: time},
 		{Key: "UserID", Value: in.GetPerson().UserId},
 	})
 
+	if err != nil {
+		fmt.Println("ERROR:", err)
+	} else {
+		fmt.Println("result:", result)
+	}
+
+
 	log.Printf("Received: %v", in.GetPerson()) 
 
 	person := getBrthdayByID(in.GetPerson().UserId, ctx)
 
-	return &pb.GetBirthdayResponse{Person: person}, nil
+	return &pb.GetBirthdayResponse{Person: person}, err
 }  
 
 
@@ -143,6 +150,7 @@ func main() {
 
 	db := client.Database("birthday_service")
 	Birthday_collection = db.Collection("birthday")
+
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
