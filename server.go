@@ -2,17 +2,18 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
-	"fmt"
 	"strconv"
-	pb "github.com/maya-fisher/birthday-service/proto"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"time"
+
+	pb "github.com/maya-fisher/birthday-service/proto"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 const (
@@ -25,132 +26,155 @@ type server struct {
 
 var Birthday_collection *mongo.Collection
 
-
 func (s *server) CreateBirthdayPersonBy(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetBirthdayResponse, error) {
+
+	log.Printf("Received: %v", in.GetPerson())
+
 
 	time := time.Unix(in.GetPerson().Birthday, 0)
 
-	result, err := Birthday_collection.InsertOne(ctx, bson.D{
-		{Key:"Name",Value: in.GetPerson().Name,},
-		{Key:"Birthday",Value: time},
+	_, err := Birthday_collection.InsertOne(ctx, bson.D{
+		{Key: "Name", Value: in.GetPerson().Name},
+		{Key: "Birthday", Value: time},
 		{Key: "UserID", Value: in.GetPerson().UserId},
 	})
 
+
 	if err != nil {
-		fmt.Println("ERROR:", err)
+		return &pb.GetBirthdayResponse{Person: nil}, err
+
 	} else {
-		fmt.Println("result:", result)
+		person, err := getBrthdayByID(in.GetPerson().UserId, ctx)
+		return &pb.GetBirthdayResponse{Person: person}, err
 	}
 
+}
 
-	log.Printf("Received: %v", in.GetPerson()) 
-
-	person := getBrthdayByID(in.GetPerson().UserId, ctx)
-
-	return &pb.GetBirthdayResponse{Person: person}, err
-}  
-
-
-func (s *server) UpdateBirthdayByIdAndName(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetBirthdayResponse, error){
+func (s *server) UpdateBirthdayByIdAndName(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetBirthdayResponse, error) {
 
 	time := time.Unix(in.GetPerson().Birthday, 0)
 	update := bson.M{"$set": bson.M{"Birthday": time}}
 	filter := bson.M{"UserID": bson.M{"$eq": in.GetPerson().UserId}}
 
-	result, err := Birthday_collection.UpdateOne(
-        context.Background(),
+	result, _ := Birthday_collection.UpdateOne(
+		context.Background(),
 		filter,
-        update,
-    )
+		update,
+	)
+
+	fmt.Println("UpdateOne() result:", result)
+
+	person, err := getBrthdayByID(in.GetPerson().UserId, ctx)
 
 	if err != nil {
-        fmt.Println("UpdateOne() result ERROR:", err)
-    } else {
-        fmt.Println("UpdateOne() result:", result)
+
+		return &pb.GetBirthdayResponse{Person: nil}, err
+	} else {
+
+			return &pb.GetBirthdayResponse{Person: person}, nil
+
 	}
 
-	person := getBrthdayByID(in.GetPerson().UserId, ctx)
+}
 
-	return &pb.GetBirthdayResponse{Person: person}, nil
-} 
+func (s *server) DeleteBirthdayByID(ctx context.Context, in *pb.GetByIDRequest) (*pb.GetBirthdayResponse, error) {
+
+	person, err := getBrthdayByID(in.GetUserId(), ctx)
+
+	log.Printf("Received: %v", in.GetUserId())
+
+
+	result, _ := Birthday_collection.DeleteOne(ctx, bson.M{"UserID": in.GetUserId()})
+
+	fmt.Printf("DeleteOne removed %v document(s)\n", result.DeletedCount)
+
+
+	if err != nil {
+		return &pb.GetBirthdayResponse{Person: nil}, err
+	} else {
+
+			return &pb.GetBirthdayResponse{Person: person}, nil
+
+	}
+
+}
 
 
 func (s *server) GetBirthdayPersonByID(ctx context.Context, in *pb.GetByIDRequest) (*pb.GetBirthdayResponse, error) {
 
-	person := getBrthdayByID(in.GetUserId(), ctx)
 
-	log.Printf("Received: %v", in.GetUserId()) 
+	person, err := getBrthdayByID(in.GetUserId(), ctx)
 
-	return &pb.GetBirthdayResponse{Person: person}, nil
-} 
-
-
-func (s *server) DeleteBirthdayByID(ctx context.Context, in *pb.GetByIDRequest) (*pb.GetBirthdayResponse, error) {
-
-	person := getBrthdayByID(in.GetUserId(), ctx)
-
-	result, err := Birthday_collection.DeleteOne(ctx, bson.M{"UserID": in.GetUserId()})
+	log.Printf("Received: %v", in.GetUserId())
 
 	if err != nil {
-    	log.Fatal(err)
+
+		return &pb.GetBirthdayResponse{Person: nil}, err
+	} else {
+
+			return &pb.GetBirthdayResponse{Person: person}, nil
+
 	}
 
-	fmt.Printf("DeleteOne removed %v document(s)\n", result.DeletedCount)
-
-	log.Printf("Received: %v", in.GetUserId()) 
-
-	return &pb.GetBirthdayResponse{Person: person}, nil
-} 
-
-
-func getBrthdayByID(id string, ctx context.Context) (*pb.Person) {
-
-	filter, err := Birthday_collection.Find(ctx, bson.M{"UserID": id})
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var filtered_users []bson.D
-
-	if err = filter.All(ctx, &filtered_users); err != nil {
-		log.Fatal(err)
-	}
-
-	name := fmt.Sprintf("%v", filtered_users[0][1].Value)
-	userId := fmt.Sprintf("%v", filtered_users[0][3].Value)
-	unconverted_birthday := fmt.Sprintf("%v", filtered_users[0][2].Value)
-	birthday, err := strconv.ParseInt(unconverted_birthday, 10, 64)
-
-	person := &pb.Person{
-		Name: name,
-		Birthday: birthday,
-		UserId: userId,
-	}
-
-	return person
 
 }
 
+
+
+func getBrthdayByID(id string, ctx context.Context) (*pb.Person, error) {
+
+	var res bson.M
+
+	err := Birthday_collection.FindOne(ctx, bson.M{"UserID": id}).Decode(&res)
+	if err == mongo.ErrNoDocuments {
+
+		person := &pb.Person{}
+
+		return person, err
+
+	}
+
+
+	name := fmt.Sprintf("%v", res["Name"])
+	userId := fmt.Sprintf("%v", res["UserID"])
+	unconverted_birthday := fmt.Sprintf("%v", res["Birthday"])
+	birthday, err := strconv.ParseInt(unconverted_birthday, 10, 64)
+	if err != nil {}
+
+	person := &pb.Person{
+		Name:     name,
+		Birthday: birthday,
+		UserId:   userId,
+	}
+
+	return person, nil
+
+}
+
+
+
+
+
 func main() {
 
+
+
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://127.0.0.1:27017/birthday_service"))
-    if err != nil {
-        log.Fatal(err)
-    }
+	if err != nil {
+		log.Fatal(err)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-    err = client.Connect(ctx)
-    if err != nil {
-        log.Fatal(err)
-    }
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    defer client.Disconnect(ctx)
+	defer client.Disconnect(ctx)
 
 	db := client.Database("birthday_service")
 	Birthday_collection = db.Collection("birthday")
-
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
