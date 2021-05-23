@@ -52,6 +52,31 @@ func (s *server) CreateBirthdayPersonBy(ctx context.Context, in *pb.GetBirthdayR
 
 func (s *server) UpdateBirthdayByIdAndName(ctx context.Context, in *pb.GetBirthdayRequest) (*pb.GetBirthdayResponse, error) {
 
+	fmt.Println("PERSON:",in.GetPerson())
+	if in.GetPerson().Name != "" {
+		update := bson.M{"$set": bson.M{"Name": in.GetPerson().Name}}
+		filter := bson.M{"UserID": bson.M{"$eq": in.GetPerson().UserId}}
+		result, _ := Birthday_collection.UpdateOne(
+			context.Background(),
+			filter,
+			update,
+		)
+
+		fmt.Println("UpdateOne() result:", result)
+
+		person, err := getBrthdayByID(in.GetPerson().UserId, ctx)
+
+		if err != nil {
+
+			return &pb.GetBirthdayResponse{Person: nil}, err
+		} else {
+	
+				return &pb.GetBirthdayResponse{Person: person}, nil
+	
+		}
+	}
+
+	
 	time := time.Unix(in.GetPerson().Birthday, 0)
 	update := bson.M{"$set": bson.M{"Birthday": time}}
 	filter := bson.M{"UserID": bson.M{"$eq": in.GetPerson().UserId}}
