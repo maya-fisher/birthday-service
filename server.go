@@ -9,15 +9,12 @@ import (
 	"time"
 
 	pb "github.com/maya-fisher/birthday-service/proto"
+	"github.com/maya-fisher/birthday-service/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-)
-
-const (
-	port = ":50054"
 )
 
 type server struct {
@@ -162,7 +159,12 @@ func getBrthdayByID(id string, ctx context.Context) (*pb.Person, error) {
 
 func main() {
 
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://mongo:27017/birthday_service"))
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(config.MONGO_URL))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -179,7 +181,7 @@ func main() {
 	db := client.Database("birthday_service")
 	Birthday_collection = db.Collection("birthday")
 
-	lis, err := net.Listen("tcp", port)
+	lis, err := net.Listen("tcp", config.PORT)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
